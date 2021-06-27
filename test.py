@@ -5,6 +5,9 @@ fee = OrderedDict()
 weight = OrderedDict()
 parents = OrderedDict()
 matrix_dictionary = OrderedDict()
+block_weight = 4000000
+no_of_txid = 0
+matrix =[]
 
 with open('mempool.csv') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
@@ -16,6 +19,9 @@ with open('mempool.csv') as csv_file:
         parents[row[0]] = row[3].split(";")
         line_count += 1
     print(f'Processed {line_count} lines.')
+    no_of_txid = line_count
+
+#matrix = [[0 for x in range(0, block_weight + 1)] for x in range(0, no_of_txid + 1)]
 
 def calculateTotalWeight():
     for i in weight:
@@ -32,7 +38,14 @@ def sortWeights():
     #     print(c, i[0], i[1])
     #     c = c + 1
 
+def dp():
+    temp_list = []
+    for i in range(0, block_weight + 1):
+        temp_list.append(0)
+    matrix.append(temp_list)
+
 
 calculateTotalWeight()
 sortWeights()
+dp()
 
