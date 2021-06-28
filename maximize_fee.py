@@ -29,7 +29,7 @@ with open('mempool.csv') as csv_file:
         line_count += 1
     no_of_txid = line_count
 
-def calculateTotalWeight():
+def calculateWeight():
     for i in total_weight:
         for j in parents[i]:
             if(j == ''):
@@ -37,7 +37,7 @@ def calculateTotalWeight():
             else:
                 total_weight[i] += total_weight[j]
 
-def calculateTotalFee():
+def calculateFee():
     for i in total_fee:
         for j in parents[i]:
             if(j == ''):
@@ -45,7 +45,7 @@ def calculateTotalFee():
             else:
                 total_fee[i] += total_fee[j]
 
-def parent_to_child():
+def parentToChild():
     for i in parents:
         for j in parents[i]:
             if j == '':
@@ -93,10 +93,10 @@ def selectTransactions():
                 includeTransaction(txid)
 
 
-calculateTotalWeight()
-calculateTotalFee()
-parent_to_child()
+calculateWeight()
+calculateFee()
+parentToChild()
 selectTransactions()
 File_object.close()
 
-print("Fee = ", cumulative_fee, " ", "Total weight = ", cumulative_weight)
+print("Total Fee = ", cumulative_fee, " ", "Total weight = ", cumulative_weight)
