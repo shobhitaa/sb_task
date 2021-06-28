@@ -53,8 +53,8 @@ def dp():
         temp_list.append(0)
     matrix.append(temp_list)
 
-    for i in range(0, 2):
-        for j in range(0, 2):
+    for i in range(0, no_of_txid):
+        for j in range(0, block_weight):
             str1 = 'matrix[' + sorted_weights[i][0] + "][" + str(j) + "]"
             matrix_map[str1] = []
 
