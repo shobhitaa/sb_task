@@ -8,13 +8,14 @@ total_fee = OrderedDict()        #contains parent transaction fee + child transa
 total_weight = OrderedDict()        #contains parent transaction weight + child transaction weight
 parents = OrderedDict()        #maps child transactions to parent transactions
 child = OrderedDict()        #maps parent transactions to child transactions
-current_fee = 0        #keeps track of cumulative fee
-current_weight = 0        #keeps track of cumulative weight
+cumulative_fee = 0        #keeps track of cumulative fee
+cumulative_weight = 0        #keeps track of cumulative weight
 block_weight = 4000000        #maximum block weight
 no_of_txid = 0        #number of transactions
 
 File_object = open("block.txt","w+")
 
+#reading input from csv file
 with open('mempool.csv') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
     line_count = 0
@@ -26,7 +27,6 @@ with open('mempool.csv') as csv_file:
         total_weight[row[0]] = int(row[2])
         parents[row[0]] = row[3].split(";")
         line_count += 1
-    print(f'Processed {line_count} lines.')
     no_of_txid = line_count
 
 def calculateTotalWeight():
@@ -64,11 +64,11 @@ def isParent(txid):
     return True if txid in child else False
 
 def includeTransaction(txid):
-    global current_weight, current_fee
+    global cumulative_weight, cumulative_fee
     if (included[txid] == False):
-        if (current_weight + weight[txid] <= block_weight):
-            current_weight += weight[txid]
-            current_fee += fee[txid]
+        if (cumulative_weight + weight[txid] <= block_weight):
+            cumulative_weight += weight[txid]
+            cumulative_fee += fee[txid]
             included[txid] = True
             File_object.write(txid + '\n')
 
@@ -81,15 +81,15 @@ def includeParent(txid):
     includeTransaction(txid)
 
 def selectTransactions():
-    global current_fee, current_weight
+    global cumulative_fee, cumulative_weight
     sorted_fees = sorted(total_fee.items(), key=lambda x: x[1], reverse = True)
     for i in sorted_fees:
         txid = i[0]
         if (isChild(txid)):
-            if (current_weight + total_weight[txid] <= block_weight):
+            if (cumulative_weight + total_weight[txid] <= block_weight):
                 includeParent(txid)
         else:
-            if (current_weight + weight[txid] <= block_weight):
+            if (cumulative_weight + weight[txid] <= block_weight):
                 includeTransaction(txid)
 
 
@@ -99,4 +99,4 @@ parent_to_child()
 selectTransactions()
 File_object.close()
 
-print(current_fee, " ", current_weight)
+print("Fee = ", cumulative_fee, " ", "Total weight = ", cumulative_weight)
