@@ -13,6 +13,7 @@ sorted_weights = []
 block_weight = 4000000
 no_of_txid = 0
 matrix =[]
+File_object = open("block.txt","w+")
 
 with open('mempool.csv') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
@@ -70,8 +71,47 @@ def sortWeights():
     #     c = c + 1
 
 def sortFees():
-    sorted_fees = sorted(total_fee.items(), key=lambda x: x[1])
-    #print(sorted_fees)
+    return sorted(total_fee.items(), key=lambda x: x[1], reverse = True)
+    # c = 1
+    # for i in sorted_fees:
+    #     print(c, " " ,i[0], " ", i[1])
+    #     c += 1
+
+def isChild(txid):
+    for j in parents[txid]:
+        if j == '':
+            return False
+    return True
+
+def isParent(txid):
+    if txid in child:
+        return True
+    else:
+        return False
+
+def removeFee(txid, parent_fee):
+    for i in child[txid]:
+        total_fee[i] -= parent_fee
+
+def selectTransactions():
+    sorted_fees = sortFees()
+    current_weight = 0
+    current_fee = 0
+    for i in sorted_fees:
+        txid = i[0]
+        
+        if (isChild(txid)):
+            continue
+        else:
+            # print(txid)
+            # print(weight[txid])
+            if (current_weight + weight[txid] <= 9000):
+                current_weight += weight[txid]
+                current_fee += fee[txid]
+                File_object.write(txid + '\n')
+            else:
+                break
+    print(current_fee)
 
 
 calculateTotalWeight()
@@ -79,3 +119,9 @@ calculateTotalFee()
 parent_to_child()
 sortWeights()
 sortFees()
+
+# sorted_fees = sorted(total_fee.items(), key=lambda x: x[1])
+# print(weight[sorted_fees[5213][0]])
+selectTransactions()
+# print(isChild('59f0495cf66d1864359dda816eb7189b9d9a3a9cd9dc50a3707776b41a6c815b'))
+File_object.close()
