@@ -48,15 +48,30 @@ def sortWeights():
 
 def dp():
     temp_list = []
+    temp_list2 = []
     sorted_weights = sorted(weight.items(), key=lambda x: x[1])
     for i in range(0, block_weight + 1):
         temp_list.append(0)
     matrix.append(temp_list)
 
-    for i in range(0, no_of_txid):
-        for j in range(0, block_weight):
-            str1 = 'matrix[' + sorted_weights[i][0] + "][" + str(j) + "]"
+    for i in range(1, no_of_txid + 1):
+        txid = sorted_weights[i - 1][0]
+        for j in range(0, 4000000 + 1):
+            str1 = 'matrix[' + txid + "][" + str(j) + "]"
+            if j == 0:
+                temp_list2.append(0)
+            elif sorted_weights[i - 1][1] < j:
+                # print(fee[txid])
+                value = max(fee[txid] + matrix[i - 1][j - sorted_weights[i - 1][1]], matrix[i - 1][j])
+                temp_list2.append(value)
+            else:
+                value = matrix[i - 1][j]
+                temp_list2.append(value)
             matrix_map[str1] = []
+        matrix.append(temp_list2)
+        #print(matrix)
+
+            
 
 
 calculateTotalWeight()
