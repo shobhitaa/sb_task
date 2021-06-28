@@ -1,15 +1,16 @@
 import csv
 from collections import OrderedDict
 
+included = OrderedDict()
 fee = OrderedDict()
 weight = OrderedDict()
 total_fee = OrderedDict()
 total_weight = OrderedDict()
 parents = OrderedDict()
 child = OrderedDict()
-matrix_map = OrderedDict()
-matrix_dictionary = OrderedDict()
 sorted_weights = []
+current_fee = 0
+current_weight = 0
 block_weight = 4000000
 no_of_txid = 0
 matrix =[]
@@ -20,6 +21,7 @@ with open('mempool.csv') as csv_file:
     line_count = 0
     for row in csv_reader:
         #print(f'\t fee = {row[1]} , weight {row[2]} , ptid = {row[3]}')
+        included[row[0]] = False
         fee[row[0]] = int(row[1])
         weight[row[0]] = int(row[2])
         total_fee[row[0]] = int(row[1])
@@ -28,8 +30,6 @@ with open('mempool.csv') as csv_file:
         line_count += 1
     print(f'Processed {line_count} lines.')
     no_of_txid = line_count
-
-#matrix = [[0 for x in range(0, block_weight + 1)] for x in range(0, no_of_txid + 1)]
 
 def calculateTotalWeight():
     for i in total_weight:
@@ -59,23 +59,9 @@ def parent_to_child():
 
 def sortWeights():
     sorted_weights = sorted(weight.items(), key=lambda x: x[1])
-    #j = 1
-    #print(sorted_weights[0][1])
-    # for i in list(sorted_weights.keys()):
-    #     sorted_ids[i] = j
-    #     j += 1
-    # print(sorted_ids)
-    # c = 1
-    # for i in sorted_weights:
-    #     print(c, i[0], i[1])
-    #     c = c + 1
 
 def sortFees():
     return sorted(total_fee.items(), key=lambda x: x[1], reverse = True)
-    # c = 1
-    # for i in sorted_fees:
-    #     print(c, " " ,i[0], " ", i[1])
-    #     c += 1
 
 def isChild(txid):
     for j in parents[txid]:
@@ -93,25 +79,34 @@ def removeFee(txid, parent_fee):
     for i in child[txid]:
         total_fee[i] -= parent_fee
 
+def includeTransaction(txid):
+    global current_weight, current_fee
+    if (included[txid] == False):
+        if (current_weight + weight[txid] <= block_weight):
+            current_weight += weight[txid]
+            current_fee += fee[txid]
+            included[txid] = True
+            File_object.write(txid + '\n')
+
+def includeParent(txid):
+    if (isChild(txid) == False):
+        includeTransaction(txid)
+    else :
+        for i in parents[txid]:
+            includeParent(i)
+    includeTransaction(txid)
+
 def selectTransactions():
-    sorted_fees = sortFees()
-    current_weight = 0
-    current_fee = 0
+    global current_fee, current_weight
+    sorted_fees = sorted(total_fee.items(), key=lambda x: x[1], reverse = True)
     for i in sorted_fees:
         txid = i[0]
-        
         if (isChild(txid)):
-            continue
+            if (current_weight + total_weight[txid] <= block_weight):
+                includeParent(txid)
         else:
-            # print(txid)
-            # print(weight[txid])
-            if (current_weight + weight[txid] <= 9000):
-                current_weight += weight[txid]
-                current_fee += fee[txid]
-                File_object.write(txid + '\n')
-            else:
-                break
-    print(current_fee)
+            if (current_weight + weight[txid] <= block_weight):
+                includeTransaction(txid)
 
 
 calculateTotalWeight()
@@ -119,9 +114,7 @@ calculateTotalFee()
 parent_to_child()
 sortWeights()
 sortFees()
-
-# sorted_fees = sorted(total_fee.items(), key=lambda x: x[1])
-# print(weight[sorted_fees[5213][0]])
 selectTransactions()
-# print(isChild('59f0495cf66d1864359dda816eb7189b9d9a3a9cd9dc50a3707776b41a6c815b'))
 File_object.close()
+
+print(current_fee, " ", current_weight)
