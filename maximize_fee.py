@@ -29,7 +29,7 @@ with open('mempool.csv') as csv_file:
         line_count += 1
     no_of_txid = line_count
 
-def calculateWeight():
+def calculateWeight() -> None:
     '''add weight of parent transactions to weight of child transactions'''
     for i in total_weight:
         for j in parents[i]:
@@ -38,7 +38,7 @@ def calculateWeight():
             else:
                 total_weight[i] += total_weight[j]
 
-def calculateFee():
+def calculateFee() -> None:
     '''add fee of parent transactions to fee of child transactions'''
     for i in total_fee:
         for j in parents[i]:
@@ -47,7 +47,7 @@ def calculateFee():
             else:
                 total_fee[i] += total_fee[j]
 
-def parentToChild():
+def parentToChild() -> None:
     '''create 'child' dictionary to map parent transaction to child transaction'''
     for i in parents:
         for j in parents[i]:
@@ -57,18 +57,18 @@ def parentToChild():
                 child[j] = []
                 child[j].append(i)
 
-def isChild(txid):
+def isChild(txid: str) -> bool:
     '''returns True if a transaction has parent transactions'''
     for j in parents[txid]:
         if j == '':
             return False
     return True
 
-def isParent(txid):
+def isParent(txid: str) -> bool:
     '''returns True if a transaction has child transactions'''
     return True if txid in child else False
 
-def includeTransaction(txid):
+def includeTransaction(txid: str) -> None:
     '''includes transaction in the block'''
     global cumulative_weight, cumulative_fee
     if (included[txid] == False):
@@ -78,7 +78,7 @@ def includeTransaction(txid):
             included[txid] = True
             File_object.write(txid + '\n')
 
-def includeParent(txid):
+def includeParent(txid: str) -> None:
     '''finds and includes parent transactions to the block of a child transaction'''
     if (isChild(txid) == False):
         includeTransaction(txid)
