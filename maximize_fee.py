@@ -30,6 +30,7 @@ with open('mempool.csv') as csv_file:
     no_of_txid = line_count
 
 def calculateWeight():
+    '''add weight of parent transactions to weight of child transactions'''
     for i in total_weight:
         for j in parents[i]:
             if(j == ''):
@@ -38,6 +39,7 @@ def calculateWeight():
                 total_weight[i] += total_weight[j]
 
 def calculateFee():
+    '''add fee of parent transactions to fee of child transactions'''
     for i in total_fee:
         for j in parents[i]:
             if(j == ''):
@@ -46,6 +48,7 @@ def calculateFee():
                 total_fee[i] += total_fee[j]
 
 def parentToChild():
+    '''create 'child' dictionary to map parent transaction to child transaction'''
     for i in parents:
         for j in parents[i]:
             if j == '':
@@ -55,15 +58,18 @@ def parentToChild():
                 child[j].append(i)
 
 def isChild(txid):
+    '''returns True if a transaction has parent transactions'''
     for j in parents[txid]:
         if j == '':
             return False
     return True
 
 def isParent(txid):
+    '''returns True if a transaction has child transactions'''
     return True if txid in child else False
 
 def includeTransaction(txid):
+    '''includes transaction in the block'''
     global cumulative_weight, cumulative_fee
     if (included[txid] == False):
         if (cumulative_weight + weight[txid] <= block_weight):
@@ -73,6 +79,7 @@ def includeTransaction(txid):
             File_object.write(txid + '\n')
 
 def includeParent(txid):
+    '''finds and includes parent transactions to the block of a child transaction'''
     if (isChild(txid) == False):
         includeTransaction(txid)
     else :
@@ -81,14 +88,16 @@ def includeParent(txid):
     includeTransaction(txid)
 
 def selectTransactions():
+    '''selects transactions with the highest fees'''
     global cumulative_fee, cumulative_weight
+    #sort transactions accourding to fee in desending order
     sorted_fees = sorted(total_fee.items(), key=lambda x: x[1], reverse = True)
     for i in sorted_fees:
         txid = i[0]
-        if (isChild(txid)):
+        if (isChild(txid)):        #if transaction has parent transactions
             if (cumulative_weight + total_weight[txid] <= block_weight):
                 includeParent(txid)
-        else:
+        else:        #if transaction does not have any parent transactions
             if (cumulative_weight + weight[txid] <= block_weight):
                 includeTransaction(txid)
 
