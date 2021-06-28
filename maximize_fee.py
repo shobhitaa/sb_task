@@ -1,26 +1,23 @@
 import csv
 from collections import OrderedDict
 
-included = OrderedDict()
-fee = OrderedDict()
-weight = OrderedDict()
+included = OrderedDict()        #keeps track of which transaction is included in block
+fee = OrderedDict()        #fee of all transaction
+weight = OrderedDict()        #weight of all transactions
 total_fee = OrderedDict()
 total_weight = OrderedDict()
 parents = OrderedDict()
 child = OrderedDict()
-sorted_weights = []
 current_fee = 0
 current_weight = 0
 block_weight = 4000000
 no_of_txid = 0
-matrix =[]
 File_object = open("block.txt","w+")
 
 with open('mempool.csv') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
     line_count = 0
     for row in csv_reader:
-        #print(f'\t fee = {row[1]} , weight {row[2]} , ptid = {row[3]}')
         included[row[0]] = False
         fee[row[0]] = int(row[1])
         weight[row[0]] = int(row[2])
@@ -56,13 +53,6 @@ def parent_to_child():
                 child[j] = []
                 child[j].append(i)
 
-
-def sortWeights():
-    sorted_weights = sorted(weight.items(), key=lambda x: x[1])
-
-def sortFees():
-    return sorted(total_fee.items(), key=lambda x: x[1], reverse = True)
-
 def isChild(txid):
     for j in parents[txid]:
         if j == '':
@@ -70,14 +60,7 @@ def isChild(txid):
     return True
 
 def isParent(txid):
-    if txid in child:
-        return True
-    else:
-        return False
-
-def removeFee(txid, parent_fee):
-    for i in child[txid]:
-        total_fee[i] -= parent_fee
+    return True if txid in child else False
 
 def includeTransaction(txid):
     global current_weight, current_fee
@@ -112,8 +95,6 @@ def selectTransactions():
 calculateTotalWeight()
 calculateTotalFee()
 parent_to_child()
-sortWeights()
-sortFees()
 selectTransactions()
 File_object.close()
 
