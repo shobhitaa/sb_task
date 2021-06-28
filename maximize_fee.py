@@ -4,14 +4,15 @@ from collections import OrderedDict
 included = OrderedDict()        #keeps track of which transaction is included in block
 fee = OrderedDict()        #fee of all transaction
 weight = OrderedDict()        #weight of all transactions
-total_fee = OrderedDict()
-total_weight = OrderedDict()
-parents = OrderedDict()
-child = OrderedDict()
-current_fee = 0
-current_weight = 0
-block_weight = 4000000
-no_of_txid = 0
+total_fee = OrderedDict()        #contains parent transaction fee + child transaction fee
+total_weight = OrderedDict()        #contains parent transaction weight + child transaction weight
+parents = OrderedDict()        #maps child transactions to parent transactions
+child = OrderedDict()        #maps parent transactions to child transactions
+current_fee = 0        #keeps track of cumulative fee
+current_weight = 0        #keeps track of cumulative weight
+block_weight = 4000000        #maximum block weight
+no_of_txid = 0        #number of transactions
+
 File_object = open("block.txt","w+")
 
 with open('mempool.csv') as csv_file:
